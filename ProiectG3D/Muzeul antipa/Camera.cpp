@@ -106,3 +106,10 @@ void Camera::Reset()
     pitch = PITCH;
     UpdateCameraVectors();
 }
+
+void Camera::Reshape(int windowWidth, int windowHeight)
+{
+    width = windowWidth;
+    height = windowHeight;
+    glViewport(0, 0, windowWidth, windowHeight);
+}
