@@ -36,6 +36,15 @@ void Camera::MoveRight(float distance)
 	position += right * distance;
 }
 
+void Camera::ProcessMouseScroll(float yOffset)
+{
+    FoVy -= yOffset;
+    if (FoVy < 1.0f)
+        FoVy = 1.0f;
+    if (FoVy > 45.0f)
+        FoVy = 45.0f;
+}
+
 void Camera::UpdateViewMatrix()
 {
 	view = glm::lookAt(position, position + forward, up);
