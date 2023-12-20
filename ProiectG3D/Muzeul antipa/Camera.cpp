@@ -45,6 +45,21 @@ void Camera::ProcessMouseScroll(float yOffset)
         FoVy = 45.0f;
 }
 
+void Camera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch)
+{
+    yaw += xOffset;
+    pitch += yOffset;
+
+    if (constrainPitch) {
+        if (pitch > 89.0f)
+            pitch = 89.0f;
+        if (pitch < -89.0f)
+            pitch = -89.0f;
+    }
+
+    UpdateCameraVectors();
+}
+
 void Camera::UpdateViewMatrix()
 {
 	view = glm::lookAt(position, position + forward, up);
