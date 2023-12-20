@@ -1,2 +1,1 @@
-﻿  Camera.cpp
-  Muzeul antipa.vcxproj -> C:\Users\George\Desktop\Proiect G3D\ProiectG3D\Debug\Muzeul antipa.exe
+﻿LINK : fatal error LNK1104: cannot open file 'kernel32.lib'
