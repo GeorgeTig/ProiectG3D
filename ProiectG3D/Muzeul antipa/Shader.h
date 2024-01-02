@@ -21,7 +21,7 @@ class Shader
 private:
 	unsigned int ID;
 	void Init(const char* vertexPath, const char* fragmentPath);
-	void CheckCompileErrors(unsigned int shaderStencilTesting, std::string type);
+	const void CheckCompileErrors(unsigned int shaderStencilTesting, std::string type);
 public:
 	unsigned int loc_model_matrix;
 	unsigned int loc_view_matrix;

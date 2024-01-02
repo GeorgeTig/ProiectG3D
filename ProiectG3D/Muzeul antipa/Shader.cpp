@@ -65,7 +65,7 @@ void Shader::Init(const char* vertexPath, const char* fragmentPath)
 	glDeleteShader(fragment);
 }
 
-void Shader::CheckCompileErrors(unsigned int shaderStencilTesting, std::string type)
+const void Shader::CheckCompileErrors(unsigned int shaderStencilTesting, std::string type)
 {
 
     int success;
