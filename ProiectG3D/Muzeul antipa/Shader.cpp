@@ -10,19 +10,22 @@ void Shader::CheckCompileErrors(unsigned int shaderStencilTesting, std::string t
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath)
 {
+	Init(vertexPath, fragmentPath);
 }
 
 Shader::~Shader()
 {
+	glDeleteProgram(ID);
 }
 
 void Shader::Use()
 {
+	glUseProgram(ID);
 }
 
 unsigned int Shader::GetID()
 {
-	return 0;
+	return ID;
 }
 
 void Shader::SetInt(const std::string& name, int value) const
