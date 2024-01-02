@@ -106,7 +106,7 @@ void Shader::Use()
 	glUseProgram(ID);
 }
 
-unsigned int Shader::GetID()
+const unsigned int Shader::GetID()
 {
 	return ID;
 }
