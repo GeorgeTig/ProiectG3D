@@ -76,7 +76,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(SolutionDir)\_external\stb-master;$(SolutionDir)\_external\glew-2.1.0-win32\glew-2.1.0\include;$(SolutionDir)\_external\glm-stable\glm-stable\glm;$(SolutionDir)\_external\glfw-3.3.4.bin.WIN32\glfw-3.3.4.bin.WIN32\include\GLFW;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)\_external\glfw-3.3.4.bin.WIN32\glfw-3.3.4.bin.WIN32\lib-vc2019;$(SolutionDir)\_external\glew-2.1.0-win32\glew-2.1.0\lib\Release\Win32</LibraryPath>
+    <LibraryPath>..\_external\glfw-3.3.4.bin.WIN32\glfw-3.3.4.bin.WIN32\lib-vc2019;..\_external\glew-2.1.0-win32\glew-2.1.0\lib\Release\Win32;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
