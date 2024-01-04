@@ -47,8 +47,9 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 unsigned int CreateTexture(const std::string& strTexturePath);
 
 //creating the room
-void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO, float &vertices, unsigned int &indices);
+void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO, std::vector<float> &vertices, std::vector<unsigned int> &indices);
 void renderFloor(const Shader& shader);
+void renderFloor();
 void renderWallRoom(const Shader& shader);
 
 int main()
@@ -148,7 +149,7 @@ unsigned int CreateTexture(const std::string& strTexturePath)
 	return textureId;
 }
 
-void renderWall(GLuint &floorVAO, GLuint &floorVBO, GLuint &floorEBO, std::vector<float> &vertices,std::vector<unsigned int> &indices)
+void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO, std::vector<float>& vertices, std::vector<unsigned int>& indices)
 {
 	// initialize (if necessary)
 	if (floorVAO == 0)
@@ -223,4 +224,53 @@ void renderWall(GLuint &floorVAO, GLuint &floorVBO, GLuint &floorEBO, std::vecto
 	glDrawElements(GL_TRIANGLES, indexArraySize / sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
+}
+
+void renderFloor(const Shader& shader)
+{
+	// floor
+	glm::mat4 model;
+	shader.SetMat4("model", model);
+	renderFloor();
+
+	model = glm::translate(model, glm::vec3(-50.0f, 0.0f, 0.0f));
+	shader.SetMat4("model", model);
+	renderFloor();
+
+}
+
+unsigned int planeVAO = 0;
+void renderFloor()
+{
+	unsigned int planeVBO;
+
+	if (planeVAO == 0) {
+		// set up vertex data (and buffer(s)) and configure vertex attributes
+		float planeVertices[] = {
+			// positions            // normals         // texcoords
+			25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+			-25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,   0.0f,  0.0f,
+			-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,   0.0f, 25.0f,
+
+			25.0f, -0.5f,  25.0f,  0.0f, 1.0f, 0.0f,  25.0f,  0.0f,
+			-25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  0.0f, 25.0f,
+			25.0f, -0.5f, -25.0f,  0.0f, 1.0f, 0.0f,  25.0f, 25.0f
+		};
+		// plane VAO
+		glGenVertexArrays(1, &planeVAO);
+		glGenBuffers(1, &planeVBO);
+		glBindVertexArray(planeVAO);
+		glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+		glBindVertexArray(0);
+	}
+
+	glBindVertexArray(planeVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
