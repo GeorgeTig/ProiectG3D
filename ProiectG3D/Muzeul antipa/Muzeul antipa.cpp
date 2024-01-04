@@ -46,6 +46,11 @@ void processInput(GLFWwindow* window);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 unsigned int CreateTexture(const std::string& strTexturePath);
 
+//creating the room
+void renderWall();
+void renderFloor(const Shader& shader);
+void renderWallRoom(const Shader& shader);
+
 int main()
 {
 	std::cout << "Hello World!\n";
