@@ -38,10 +38,10 @@ private:
     const float PITCH = 0.0f;
     const float FOV = 45.0f;
     glm::vec3 startPosition;
-    glm::mat4 view;
+ 
 
 protected:
-    const float cameraSpeedFactor = 2.0f;
+    const float cameraSpeedFactor = 7.5f;
     const float mouseSensitivity = 0.1f;
 
     // Perspective properties
@@ -77,12 +77,12 @@ public:
     void ProcessMouseScroll(float yOffset);
     void ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch = true);
     void ProcessKeyboard(ECameraMovementType direction, float deltaTime);
-    void UpdateViewMatrix();
     void UpdateCameraVectors();
     void Set(const int width, const int height, const glm::vec3& position);
     void Reset(const int width, const int height);
     void Reshape(int windowWidth, int windowHeight);
-    const glm::mat4& GetViewMatrix();
+    const glm::vec3 GetPosition();
+    const glm::mat4 GetViewMatrix();
     const glm::mat4 GetProjectionMatrix();
     
 };

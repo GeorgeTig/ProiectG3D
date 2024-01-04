@@ -60,11 +60,13 @@ void Camera::MouseControl(float xPos, float yPos)
 
 void Camera::ProcessMouseScroll(float yOffset)
 {
-    FoVy -= yOffset;
-    if (FoVy < 1.0f)
+    if (FoVy >= 1.0f && FoVy <= 90.0f) {
+        FoVy -= yOffset;
+    }
+    if (FoVy <= 1.0f)
         FoVy = 1.0f;
-    if (FoVy > 45.0f)
-        FoVy = 45.0f;
+    if (FoVy >= 90.0f)
+        FoVy = 90.0f;
 }
 
 void Camera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch)
@@ -105,11 +107,6 @@ void Camera::ProcessKeyboard(ECameraMovementType direction, float deltaTime)
         position -= up * velocity;
         break;
     }
-}
-
-void Camera::UpdateViewMatrix()
-{
-	view = glm::lookAt(position, position + forward, up);
 }
 
 void Camera::UpdateCameraVectors()
@@ -158,9 +155,15 @@ void Camera::Reshape(int windowWidth, int windowHeight)
     glViewport(0, 0, windowWidth, windowHeight);
 }
 
-const glm::mat4& Camera::GetViewMatrix()
+const glm::vec3 Camera::GetPosition()
 {
- return view;   
+    return position;
+}
+
+const glm::mat4 Camera::GetViewMatrix()
+{
+    // Returns the View Matrix
+    return glm::lookAt(position, position + forward, up);
 }
 
 const glm::mat4 Camera::GetProjectionMatrix()

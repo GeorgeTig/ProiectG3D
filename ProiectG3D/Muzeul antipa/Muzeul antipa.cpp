@@ -34,6 +34,7 @@ bool rot = false;
 objl::Loader Loader;
 Camera* pCamera = nullptr;
 unsigned int planeVAO = 0;
+
 float vertices[82000];
 unsigned int indices[72000];
 GLuint floorVAO, floorVBO, floorEBO;
@@ -51,11 +52,15 @@ void processInput(GLFWwindow* window);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 unsigned int CreateTexture(const std::string& strTexturePath);
 
-//creating the room
-void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO);
+//creating and rendering the room with textures and objects
+void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO,int p);
 void renderFloor(const Shader& shader);
 void renderFloor();
 void renderWallRoom(const Shader& shader);
+
+//creating textures
+
+//rendering objects
 
 int main(int argc, char** argv)
 {
@@ -109,6 +114,10 @@ int main(int argc, char** argv)
 	shadowMappingShader.SetInt("diffuseTexture", 0);
 	shadowMappingShader.SetInt("shadowMap", 1);
 
+	// load textures
+	unsigned int wallTexture = CreateTexture(strExePath + "\\wall.jpg");
+	unsigned int floorTexture = CreateTexture(strExePath + "\\floor.jpg");
+
 	// configure depth map FBO
 	const unsigned int SHADOW_WIDTH = 4098, SHADOW_HEIGHT = 4098;
 	unsigned int depthMapFBO;
@@ -151,6 +160,74 @@ int main(int argc, char** argv)
 		// input
 		processInput(window);
 
+		// render
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// 1. render depth of scene to texture (from light's perspective)
+		glm::mat4 lightProjection, lightView;
+		glm::mat4 lightSpaceMatrix;
+		float near_plane = 1.0f, far_plane = 7.5f;
+		lightProjection = glm::ortho(10.0f, -10.0f, -10.0f, 10.0f, near_plane, far_plane);
+		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		lightSpaceMatrix = lightProjection * lightView;
+
+		// render scene from light's point of view
+		shadowMappingDepthShader.Use();
+		shadowMappingDepthShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, floorTexture);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		renderFloor(shadowMappingDepthShader);
+		glCullFace(GL_BACK);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, wallTexture);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+		renderWallRoom(shadowMappingDepthShader);
+		glCullFace(GL_BACK);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		// reset viewport
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		// 2. render scene as normal using the generated depth/shadow map 
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		shadowMappingShader.Use();
+		glm::mat4 projection = pCamera->GetProjectionMatrix();
+		glm::mat4 view = pCamera->GetViewMatrix();
+		shadowMappingShader.SetMat4("projection", projection);
+		shadowMappingShader.SetMat4("view", view);
+		// set light uniforms
+		shadowMappingShader.SetVec3("viewPos", pCamera->GetPosition());
+		shadowMappingShader.SetVec3("lightPos", lightPos);
+		shadowMappingShader.SetMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, floorTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		glDisable(GL_CULL_FACE);
+		renderFloor(shadowMappingShader);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, wallTexture);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, depthMap);
+		glDisable(GL_CULL_FACE);
+		renderWallRoom(shadowMappingShader);
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
@@ -255,7 +332,7 @@ unsigned int CreateTexture(const std::string& strTexturePath)
 	return textureId;
 }
 
-void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO)
+void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO,int p)
 {
 	// initialize (if necessary)
 	if (floorVAO == 0)
@@ -268,7 +345,7 @@ void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO)
 		Loader.LoadFile("..\\OBJ\\room.obj");
 		for (int i = 0; i < Loader.LoadedMeshes.size(); i++)
 		{
-			objl::Mesh curMesh = Loader.LoadedMeshes[1];
+			objl::Mesh curMesh = Loader.LoadedMeshes[p];
 			int size = curMesh.Vertices.size();
 
 			for (int j = 0; j < curMesh.Vertices.size(); j++)
@@ -389,31 +466,31 @@ void renderWallRoom(const Shader& shader)
 	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO1, floorVBO1, floorEBO1);
+	renderWall(floorVAO1, floorVBO1, floorEBO1,1);
 
 	model = glm::mat4();
 	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO2, floorVBO2, floorEBO2);
+	renderWall(floorVAO2, floorVBO2, floorEBO2,2);
 
 	model = glm::mat4();
 	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO3, floorVBO3, floorEBO3);
+	renderWall(floorVAO3, floorVBO3, floorEBO3,3);
 
 	model = glm::mat4();
 	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO4, floorVBO4, floorEBO4);
+	renderWall(floorVAO4, floorVBO4, floorEBO4,4);
 
 	model = glm::mat4();
 	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO5, floorVBO5, floorEBO5);
+	renderWall(floorVAO5, floorVBO5, floorEBO5,5);
 
 	//second room
 
@@ -421,24 +498,24 @@ void renderWallRoom(const Shader& shader)
 	model = glm::translate(model, glm::vec3(-97.0f, -1.0f, 1.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO1, floorVBO1, floorEBO1);
+	renderWall(floorVAO1, floorVBO1, floorEBO1,1);
 
 	model = glm::mat4();
 	model = glm::translate(model, glm::vec3(-50.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO2, floorVBO2, floorEBO2);
+	renderWall(floorVAO2, floorVBO2, floorEBO2,2);
 
 	model = glm::mat4();
 	model = glm::translate(model, glm::vec3(-50.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO3, floorVBO3, floorEBO3);
+	renderWall(floorVAO3, floorVBO3, floorEBO3,3);
 
 	model = glm::mat4();
 	model = glm::translate(model, glm::vec3(-50.0f, -1.0f, 0.0f));
 	model = glm::scale(model, glm::vec3(2.f));
 	shader.SetMat4("model", model);
-	renderWall(floorVAO4, floorVBO4, floorEBO4);
+	renderWall(floorVAO4, floorVBO4, floorEBO4,4);
 
 }
