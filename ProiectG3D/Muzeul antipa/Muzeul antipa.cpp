@@ -96,9 +96,18 @@ int main(int argc, char** argv)
 	// configure global opengl state
 	glEnable(GL_DEPTH_TEST);
 
+	// lighting info
+	glm::vec3 lightPos(-25.0f, 6.0f, -1.0f);
+	glEnable(GL_CULL_FACE);
+
 	// build and compile shaders
 	Shader shadowMappingShader("..\\Shaders\\ShadowMapping.vs", "..\\Shaders\\ShadowMapping.fs");
 	Shader shadowMappingDepthShader("..\\Shaders\\ShadowMappingDepth.vs", "..\\Shaders\\ShadowMappingDepth.fs");
+
+	// shader configuration
+	shadowMappingShader.Use();
+	shadowMappingShader.SetInt("diffuseTexture", 0);
+	shadowMappingShader.SetInt("shadowMap", 1);
 
 	// configure depth map FBO
 	const unsigned int SHADOW_WIDTH = 4098, SHADOW_HEIGHT = 4098;
