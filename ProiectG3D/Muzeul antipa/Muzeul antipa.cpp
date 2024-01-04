@@ -133,7 +133,35 @@ int main(int argc, char** argv)
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+	// render loop
+	while (!glfwWindowShouldClose(window))
+	{
+		// per-frame time logic
+		float currentFrame = (float)glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
+		if (rot)
+		{
+			lightPos.x = 3.0 * sin(currentFrame);
+			lightPos.z = 3.0 * cos(currentFrame);
+
+		}
+
+		// input
+		processInput(window);
+
+
+		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	// optional: de-allocate all resources once they've outlived their purpose:
+	delete pCamera;
+
+	glfwTerminate();
+	return 0;
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
