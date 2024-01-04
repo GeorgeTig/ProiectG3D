@@ -33,10 +33,19 @@ const unsigned int SCR_HEIGHT = 1080;
 double deltaTime = 0.0f;   
 double lastFrame = 0.0f;
 
-
+//variabe used in code
 bool rot = false;
 objl::Loader Loader;
 Camera* pCamera = nullptr;
+unsigned int planeVAO = 0;
+float vertices[82000];
+unsigned int indices[72000];
+GLuint floorVAO, floorVBO, floorEBO;
+GLuint floorVAO1, floorVBO1, floorEBO1;
+GLuint floorVAO2, floorVBO2, floorEBO2;
+GLuint floorVAO3, floorVBO3, floorEBO3;
+GLuint floorVAO4, floorVBO4, floorEBO4;
+GLuint floorVAO5, floorVBO5, floorEBO5;
 
 //function used
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -47,7 +56,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 unsigned int CreateTexture(const std::string& strTexturePath);
 
 //creating the room
-void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO, std::vector<float> &vertices, std::vector<unsigned int> &indices);
+void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO);
 void renderFloor(const Shader& shader);
 void renderFloor();
 void renderWallRoom(const Shader& shader);
@@ -149,7 +158,7 @@ unsigned int CreateTexture(const std::string& strTexturePath)
 	return textureId;
 }
 
-void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO, std::vector<float>& vertices, std::vector<unsigned int>& indices)
+void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO)
 {
 	// initialize (if necessary)
 	if (floorVAO == 0)
@@ -198,7 +207,7 @@ void renderWall(GLuint& floorVAO, GLuint& floorVBO, GLuint& floorEBO, std::vecto
 		glGenBuffers(1, &floorEBO);
 		// fill buffer
 		glBindBuffer(GL_ARRAY_BUFFER, floorVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), &vertices, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, floorEBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), &indices, GL_DYNAMIC_DRAW);
@@ -239,7 +248,6 @@ void renderFloor(const Shader& shader)
 
 }
 
-unsigned int planeVAO = 0;
 void renderFloor()
 {
 	unsigned int planeVBO;
@@ -273,4 +281,67 @@ void renderFloor()
 
 	glBindVertexArray(planeVAO);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+}
+
+void renderWallRoom(const Shader& shader)
+{
+	//first room
+
+	glm::mat4 model;
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO1, floorVBO1, floorEBO1);
+
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO2, floorVBO2, floorEBO2);
+
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO3, floorVBO3, floorEBO3);
+
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO4, floorVBO4, floorEBO4);
+
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO5, floorVBO5, floorEBO5);
+
+	//second room
+
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(-97.0f, -1.0f, 1.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO1, floorVBO1, floorEBO1);
+
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(-50.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO2, floorVBO2, floorEBO2);
+
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(-50.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO3, floorVBO3, floorEBO3);
+
+	model = glm::mat4();
+	model = glm::translate(model, glm::vec3(-50.0f, -1.0f, 0.0f));
+	model = glm::scale(model, glm::vec3(2.f));
+	shader.SetMat4("model", model);
+	renderWall(floorVAO4, floorVBO4, floorEBO4);
+
 }
