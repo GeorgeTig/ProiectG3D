@@ -36,6 +36,28 @@ void Camera::MoveRight(float distance)
 	position += right * distance;
 }
 
+void Camera::MouseControl(float xPos, float yPos)
+{
+    if (bFirstMouseMove) {
+        lastX = xPos;
+        lastY = yPos;
+        bFirstMouseMove = false;
+    }
+
+    float xChange = xPos - lastX;
+    float yChange = lastY - yPos;
+    lastX = xPos;
+    lastY = yPos;
+
+    if (fabs(xChange) <= 1e-6 && fabs(yChange) <= 1e-6) {
+        return;
+    }
+    xChange *= mouseSensitivity;
+    yChange *= mouseSensitivity;
+
+    ProcessMouseMovement(xChange, yChange);
+}
+
 void Camera::ProcessMouseScroll(float yOffset)
 {
     FoVy -= yOffset;
@@ -58,6 +80,31 @@ void Camera::ProcessMouseMovement(float xOffset, float yOffset, bool constrainPi
     }
 
     UpdateCameraVectors();
+}
+
+void Camera::ProcessKeyboard(ECameraMovementType direction, float deltaTime)
+{
+    float velocity = (float)(cameraSpeedFactor * deltaTime);
+    switch (direction) {
+    case ECameraMovementType::FORWARD:
+        position += forward * velocity;
+        break;
+    case ECameraMovementType::BACKWARD:
+        position -= forward * velocity;
+        break;
+    case ECameraMovementType::LEFT:
+        position -= right * velocity;
+        break;
+    case ECameraMovementType::RIGHT:
+        position += right * velocity;
+        break;
+    case ECameraMovementType::UP:
+        position += up * velocity;
+        break;
+    case ECameraMovementType::DOWN:
+        position -= up * velocity;
+        break;
+    }
 }
 
 void Camera::UpdateViewMatrix()
@@ -99,12 +146,9 @@ void Camera::Set(const int width, const int height, const glm::vec3& position)
     UpdateCameraVectors();
 }
 
-void Camera::Reset()
+void Camera::Reset(const int width, const int height)
 {
-    position = startPosition;
-    yaw = YAW;
-    pitch = PITCH;
-    UpdateCameraVectors();
+    Set(width, height, startPosition);
 }
 
 void Camera::Reshape(int windowWidth, int windowHeight)

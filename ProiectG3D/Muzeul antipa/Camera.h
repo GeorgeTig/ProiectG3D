@@ -17,6 +17,17 @@
 #pragma comment (lib, "OpenGL32.lib")
 #pragma once
 
+enum ECameraMovementType
+{
+    UNKNOWN,
+    FORWARD,
+    BACKWARD,
+    LEFT,
+    RIGHT,
+    UP,
+    DOWN
+};
+
 class Camera
 {
 private:
@@ -62,12 +73,14 @@ public:
     void MoveDown(float distance);
     void MoveLeft(float distance);
     void MoveRight(float distance);
+    void MouseControl(float xPos, float yPos);
     void ProcessMouseScroll(float yOffset);
     void ProcessMouseMovement(float xOffset, float yOffset, bool constrainPitch = true);
+    void ProcessKeyboard(ECameraMovementType direction, float deltaTime);
     void UpdateViewMatrix();
     void UpdateCameraVectors();
     void Set(const int width, const int height, const glm::vec3& position);
-    void Reset();
+    void Reset(const int width, const int height);
     void Reshape(int windowWidth, int windowHeight);
     const glm::mat4& GetViewMatrix();
     const glm::mat4 GetProjectionMatrix();
