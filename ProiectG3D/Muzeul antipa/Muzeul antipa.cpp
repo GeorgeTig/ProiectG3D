@@ -8,21 +8,17 @@
 #include <GLM.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-
 #include <glfw3.h>
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
 #define STB_IMAGE_IMPLEMENTATION
-
 #include <stb_image.h>
 #include "OBJ_Loader.h"
 #pragma comment (lib, "glfw3dll.lib")
 #pragma comment (lib, "glew32.lib")
 #pragma comment (lib, "OpenGL32.lib")
-
 #include "Camera.h"
 #include "Shader.h"
 
@@ -61,10 +57,52 @@ void renderFloor(const Shader& shader);
 void renderFloor();
 void renderWallRoom(const Shader& shader);
 
-int main()
+int main(int argc, char** argv)
 {
-	std::cout << "Hello World!\n";
-	return 0;
+	std::string strFullExeFileName = argv[0];
+	std::string strExePath;
+	const size_t last_slash_idx = strFullExeFileName.rfind('\\');
+	if (std::string::npos != last_slash_idx) {
+		strExePath = strFullExeFileName.substr(0, last_slash_idx);
+	}
+
+	// glfw: initialize and configure
+	glfwInit();
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+	// glfw window creation
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "Explorarea muzeului Antipa", NULL, NULL);
+	if (window == NULL) {
+		std::cout << "Failed to create GLFW window" << std::endl;
+		glfwTerminate();
+		return -1;
+	}
+
+	glfwMakeContextCurrent(window);
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetScrollCallback(window, scroll_callback);
+	glfwSetKeyCallback(window, key_callback);
+	// tell GLFW to capture our mouse
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	glewInit();
+
+
+
+	// Create camera
+	pCamera = new Camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0, 1.0, 3.0));
+
+	// configure global opengl state
+	// -----------------------------
+	glEnable(GL_DEPTH_TEST);
+
+	// build and compile shaders
+	// -------------------------
+	Shader shadowMappingShader("..\\Shaders\\ShadowMapping.vs", "..\\Shaders\\ShadowMapping.fs");
+	Shader shadowMappingDepthShader("..\\Shaders\\ShadowMappingDepth.vs", "..\\Shaders\\ShadowMappingDepth.fs");
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
